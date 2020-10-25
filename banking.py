@@ -13,7 +13,6 @@ conn.commit()
 
 logged_in = False
 found = 0
-numbers = ()
 
 
 class CreditCard:
@@ -67,6 +66,7 @@ while running:
         cur.execute(f"""INSERT INTO card (number, pin) VALUES ({card.number}, {card.pin});""")
         conn.commit()
         print(f"Your card has been created\nYour card number:\n{card.number}\nYour card PIN:\n{card.pin}\n")
+    
     elif choice == '2':
         login_number = input("\nEnter your card number:\n")
         login_pin = input("Enter your PIN:\n")
@@ -79,23 +79,30 @@ while running:
                 while 1:
                     login_choice = input("\n1. Balance\n2. Add income\n3. Do transfer\n4. Close Account\n5. Log out\n0."
                                          " Exit\n")
+                    
                     if login_choice == '1':
                         print('\nBalance: ', balance)
+                    
                     elif login_choice == '2':
                         income = int(input("Enter income:\n"))
                         cur.execute(f"UPDATE card SET balance = balance + {income} WHERE number = {login_number};")
                         conn.commit()
                         balance += income
                         print("Income was added!")
+                    
                     elif login_choice == '3':
                         print("Transfer")
                         transfer_number = input("Enter card number:\n")
+                        
                         if len(transfer_number) == 16 and transfer_number[15] == checksum(transfer_number):
                             for number in cur.execute("SELECT number FROM card;"):
+                                
                                 if transfer_number == number[0]:
                                     found = 1
+                                    
                                     if transfer_number != login_number:
                                         transfer_money = int(input("Enter how much money you want to transfer:\n"))
+                                        
                                         if transfer_money > balance:
                                             print("Not enough money!")
                                         else:
@@ -113,19 +120,23 @@ while running:
                                  print("Such a card does not exist.")
                         else:
                             print("Probably you made a mistake in the card number. Please try again!")
+                    
                     elif login_choice == '4':
                         cur.execute(f"DELETE FROM card WHERE number = {login_number}")
                         conn.commit()
                         print("The account has been closed!")
+                    
                     elif login_choice == '5':
                         print('\nYou have successfully logged out!\n')
                         break
+                    
                     elif login_choice == '0':
                         print('\nBye!')
                         running = False
                         break
         if not logged_in:
             print('Wrong card number or PIN!\n')
+    
     elif choice == '0':
         print('\nBye!')
         running = False
